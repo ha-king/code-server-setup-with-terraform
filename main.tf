@@ -21,6 +21,7 @@ data "aws_ssm_parameter" "ubuntu_ami" {
 # Security Group
 #------------------------------------------------------
 resource "aws_security_group" "vscode_server" {
+  name_prefix = "VSCodeServer-"
   description = "Allow ingress from CloudFront prefix list"
   vpc_id      = var.vpc_id != "" ? var.vpc_id : null
 
@@ -55,7 +56,11 @@ resource "aws_iam_role" "vscode_server" {
       Principal = { Service = "ec2.amazonaws.com" }
     }]
   })
-  managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"]
+}
+
+resource "aws_iam_role_policy_attachment" "vscode_server_ssm" {
+  role       = aws_iam_role.vscode_server.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
 }
 
 resource "aws_iam_instance_profile" "vscode_server" {
